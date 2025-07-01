@@ -1,0 +1,36 @@
+[project]
+name = "backend-p"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "alembic>=1.16.2",
+    "asyncpg>=0.30.0",
+    "fastapi>=0.115.14",
+    "pydantic-settings>=2.10.1",
+    "pydantic[email]>=2.11.7",
+    "sqlalchemy[asyncio]>=2.0.41",
+    "uvicorn>=0.35.0",
+]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.16.1",
+    "pytest>=8.4.1",
+    "pytest-cov>=6.2.1",
+    "ruff>=0.12.1",
+]
+
+
+[tool.ruff]
+select = ["E", "F", "I", "N", "UP", "B", "A"]
+
+target-version = "py312"
+
+src = ["src", "tests"]
+exclude = [
+    "alembic",
+    ".venv",
+    "venv",
+]
