@@ -1,18 +1,16 @@
-from datetime import datetime
-
-from sqlalchemy import func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from src.mixin import TimeStampMixin
 from src.models import Base
+from src.portfolio.models import Portfolio
 
 
-class User(Base):
+class User(TimeStampMixin, Base):
     __tablename__ = 'users'
 
-    name: Mapped[str]
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(20), unique=True)
     email: Mapped[str] = mapped_column(unique=True)
     password: Mapped[str]
 
-    created_at: Mapped[datetime] = mapped_column(
-        server_default=func.now(),
-        default=datetime.now(),
-    )
+    portfolios: Mapped[list['Portfolio']] = relationship(back_populates='user')
