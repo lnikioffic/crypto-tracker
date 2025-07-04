@@ -6,3 +6,8 @@ auth_router = APIRouter(
     prefix='/auth', tags=['Auth', 'User'], dependencies=[Depends(http_bearer)]
 )
 user_router = APIRouter(prefix='/user', tags=['User'])
+
+
+@user_router.post('/login')
+async def login():
+    return {"message": "Login endpoint is under construction."}
