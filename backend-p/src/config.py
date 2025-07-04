@@ -1,19 +1,25 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-class Settings(BaseSettings):
-    postgres_host: str
-    postgres_port: str
-    postgres_user: str
-    postgres_password: str
-    postgres_db: str
+class ConfigBase(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file='.env', case_sensitive=False, env_file_encoding='utf-8', extra='ignore'
+    )
+
+
+class ConfigDB(ConfigBase):
+    HOST: str
+    PORT: str
+    USER: str
+    PASSWORD: str
+    DB: str
 
     model_config = SettingsConfigDict(
-        env_file='.env', env_prefix='POSTGRES_', case_sensitive=False, env_file_encoding='utf-8'
+        env_prefix='POSTGRES_',
     )
 
     def get_db_url(self) -> str:
-        return f'postgresql+asyncpg://{self.postgres_user}:{self.postgres_password}@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}'
+        return f'postgresql+asyncpg://{self.USER}:{self.PASSWORD}@{self.HOST}:{self.PORT}/{self.DB}'
 
 
-settings = Settings()
+config_db = ConfigDB()

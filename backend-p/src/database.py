@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
-from src.config import settings
+from src.config import config_db
 
 
 class DataBase:
@@ -42,7 +42,7 @@ class DataBase:
         pass
 
 
-db = DataBase(settings.get_db_url())
+db = DataBase(config_db.get_db_url())
 
 
 async def get_session() -> AsyncGenerator[AsyncSession]:
