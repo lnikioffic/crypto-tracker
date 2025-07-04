@@ -15,7 +15,7 @@ class Portfolio(TimeStampMixin, Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(20), unique=True)
     user_id: Mapped[int] = mapped_column(
-        ForeignKey('user.id', onupdate='CASCADE', ondelete='RESTRICT')
+        ForeignKey('users.id', onupdate='CASCADE', ondelete='RESTRICT')
     )
 
     user: Mapped['User'] = relationship(back_populates='portfolios')
