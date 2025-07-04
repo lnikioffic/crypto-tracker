@@ -2,7 +2,6 @@ import json
 import redis.asyncio as redis
 from src.api_coins.schemas import Coin, CoinData
 from src.api_coins.config import config_coins
-from src.api_coins.utils import response_parser
 
 
 class RedisRepository:
@@ -14,22 +13,24 @@ class RedisRepository:
 
     async def set_coins(self, coins: list[Coin]):
         serialized = json.dumps([coin.model_dump() for coin in coins], default=str)
-        await self._client.set("coins:list", serialized)
+        await self._client.set("coins:list", serialized, ex=3600)  # 1 hour expiration
 
-    async def get_coins(self) -> list[Coin]:
+    async def get_coins(self) -> list[dict]:
         data = await self._client.get("coins:list")
         if not data:
             return []
         coin_dicts = json.loads(data)
-        return response_parser(coin_dicts, Coin)
+        return coin_dicts
 
     async def set_main_data(self, data: list[CoinData]):
         serialized = json.dumps([d.model_dump() for d in data], default=str)
-        await self._client.set("coins:main_data", serialized)
+        await self._client.set(
+            "coins:main_data", serialized, ex=120
+        )  # 2 minutes expiration
 
-    async def get_main_data(self) -> list[CoinData]:
+    async def get_main_data(self) -> list[dict]:
         data = await self._client.get("coins:main_data")
         if not data:
             return []
         coin_dicts = json.loads(data)
-        return response_parser(coin_dicts, CoinData)
+        return coin_dicts
