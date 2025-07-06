@@ -1,21 +1,20 @@
-from fastapi import APIRouter
-from src.api_coins.schemas import CoinName, CoinData
+from fastapi import APIRouter, HTTPException, status
 from src.api_coins.redis_client import RedisRepository
-from src.api_coins.utils import CoinsResponse
-from src.api_coins.utils import response_parser, dict_to_model_list
+from src.api_coins.schemas import CoinData, CoinName
+from src.api_coins.utils import CoinsResponse, dict_to_model_list, response_parser
 
 coin_router = APIRouter(prefix='/coins', tags=['Coins'])
-redis_repository = RedisRepository()
+coins_response = CoinsResponse()
 
 
-@coin_router.get('/names', response_model=list[CoinName])
+@coin_router.get('/names', status_code=200, response_model=list[CoinName])
 async def get_coins_list_name():
+    redis_repository = RedisRepository()
     coins = await redis_repository.get_coins()
     if coins:
         coins = dict_to_model_list(coins, CoinName)
         return coins
 
-    coins_response = CoinsResponse()
     coins = await coins_response.get_coins_list()
     coins = response_parser(coins, CoinName)
 
@@ -23,14 +22,14 @@ async def get_coins_list_name():
     return coins
 
 
-@coin_router.get('/', response_model=list[CoinData])
+@coin_router.get('/', status_code=200, response_model=list[CoinData])
 async def get_coins_list():
+    redis_repository = RedisRepository()
     coins = await redis_repository.get_main_data()
     if coins:
         coins = dict_to_model_list(coins, CoinData)
         return coins
 
-    coins_response = CoinsResponse()
     coins = await coins_response.get_coins_markets()
     coins = response_parser(coins, CoinData)
 
@@ -38,6 +37,15 @@ async def get_coins_list():
     return coins
 
 
-@coin_router.get('/{id}')
-async def get_coin():
-    pass
+# TODO Сделать проверку на колличество ids
+@coin_router.get('/{ids}', status_code=200, response_model=CoinData)
+async def get_coin(ids: str):
+    params = {'ids': ids}
+    coins = await coins_response.get_coins_markets(params=params)
+    coin = response_parser(coins, CoinData)
+    if len(coin) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Такого токена нету',
+        )
+    return coin[0]
