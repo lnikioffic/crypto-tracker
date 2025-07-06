@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr
 
 
 class TokenInfo(BaseModel):
@@ -7,7 +7,19 @@ class TokenInfo(BaseModel):
     token_type: str = 'Bearer'
 
 
-class CreateUser(BaseModel):
-    name: str
+class UserCreate(BaseModel):
+    username: str
     email: EmailStr
+    password: str
+
+
+class UserRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    username: str
+    email: EmailStr
+
+
+class UserLogin(UserRead):
     password: str
