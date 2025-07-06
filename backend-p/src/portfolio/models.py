@@ -19,6 +19,7 @@ class Portfolio(TimeStampMixin, Base):
     )
 
     user: Mapped['User'] = relationship(back_populates='portfolios')
+    coins: Mapped[list['PortfolioCoin']] = relationship(back_populates='portfolio')
 
 
 class PortfolioCoin(TimeStampMixin, Base):
