@@ -1,11 +1,11 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-from src.auth.router import auth_router, user_router
-from src.portfolio.router import portfolio_router
-from src.database import db
-from src.api_coins.router import coin_router
 from src.api_coins.redis_client import RedisRepository
+from src.api_coins.router import coin_router
+from src.auth.router import auth_router, user_router
+from src.database import db
+from src.portfolio.router import portfolio_router
 
 
 @asynccontextmanager

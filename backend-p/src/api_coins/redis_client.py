@@ -1,7 +1,8 @@
 import json
+
 import redis.asyncio as redis
-from src.api_coins.schemas import Coin, CoinData
 from src.api_coins.config import config_coins
+from src.api_coins.schemas import Coin, CoinData
 
 
 class RedisRepository:
