@@ -34,11 +34,6 @@ async def refresh_token_jwt(user: UserRead) -> TokenInfo:
     return TokenInfo(access_token=access_token)
 
 
-async def delete_token_jwt(user: UserRead) -> TokenInfo:
-
-    return TokenInfo(access_token='', refresh_token=None)
-
-
 async def valid_user_username(user_name: str, session: AsyncSession) -> UserLogin:
     user = await get_user_by_username(session, user_name)
 
@@ -69,7 +64,7 @@ async def validate_create_user(
 async def validate_auth_user_issue_jwt(
     username: Annotated[str, Form()],
     password: Annotated[str, Form()],
-    db_session: DbSession,
+    session: DbSession,
 ) -> TokenInfo:
     unauthed_exc = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -77,7 +72,7 @@ async def validate_auth_user_issue_jwt(
         headers={'WWW-Authenticate': 'Bearer'},
     )
 
-    user: UserLogin = await valid_user_username(username, db_session)
+    user: UserLogin = await valid_user_username(username, session)
     if not user:
         raise unauthed_exc
 
@@ -121,12 +116,12 @@ async def validate_token_type(
 
 
 async def get_current_auth_user_by_token_sub(
-    db_session: DbSession,
+    session: DbSession,
     payload: Annotated[dict, Depends(get_current_token_payload)],
 ) -> UserRead:
     await validate_token_type(payload=payload, token_type=TokenType.ACCESS_TOKEN_TYPE)
     id: str | None = payload.get('sub')
-    if user := await valid_user_id(int(id), db_session):
+    if user := await valid_user_id(int(id), session):
         return user
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -135,7 +130,7 @@ async def get_current_auth_user_by_token_sub(
 
 
 async def get_current_auth_user_for_refresh(
-    session: AsyncSession,
+    session: DbSession,
     payload: Annotated[dict, Depends(get_current_token_payload)],
 ) -> UserRead:
     await validate_token_type(payload=payload, token_type=TokenType.REFRESH_TOKEN_TYPE)

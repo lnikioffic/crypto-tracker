@@ -6,9 +6,12 @@ from src.auth.dependencies import (
     get_current_auth_user_by_token_sub,
     validate_auth_user_issue_jwt,
     validate_create_user,
+    get_current_auth_user_for_refresh,
+    refresh_token_jwt,
 )
 from src.auth.schemas import TokenInfo, UserCreate, UserRead
 from src.auth.service import create_user
+from src.auth.token import create_refresh_token
 from src.database import DbSession
 
 http_bearer = HTTPBearer(auto_error=False)
@@ -23,14 +26,14 @@ user_router = APIRouter(
 @auth_router.post(
     '/register', status_code=status.HTTP_201_CREATED, response_model=TokenInfo
 )
-async def register(user: UserCreate, db_session: DbSession):
-    user_read = await create_user(db_session, user)
+async def register(user: UserCreate, session: DbSession):
+    user_read = await create_user(session, user)
     token = await validate_create_user(user_read)
     return token
 
 
 @auth_router.post('/login', response_model=TokenInfo)
-async def login_issue_jwt(
+async def login(
     token: Annotated[TokenInfo, Depends(validate_auth_user_issue_jwt)],
 ):
     return token
@@ -38,15 +41,19 @@ async def login_issue_jwt(
 
 @auth_router.post('/logout')
 async def logout():
-    return {"message": "Logout endpoint is under construction."}
+    return TokenInfo(access_token='', refresh_token='')
 
 
-@auth_router.post('/refresh')
-async def refresh():
-    return {"message": "Token refresh endpoint is under construction."}
+@auth_router.post(
+    '/refresh', response_model=TokenInfo, response_model_exclude_none=True
+)
+async def refresh(
+    user: Annotated[UserRead, Depends(get_current_auth_user_for_refresh)],
+):
+    token = await refresh_token_jwt(user)
+    return token
 
 
-# validate_auth_user
 @user_router.get('/me', response_model=UserRead)
 async def get_current_user(
     user: Annotated[UserRead, Depends(get_current_auth_user_by_token_sub)],
