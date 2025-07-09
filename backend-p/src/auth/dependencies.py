@@ -78,7 +78,7 @@ async def validate_auth_user_issue_jwt(
 
     if not validate_password(
         password=password,
-        hash_password=user.password,
+        hashed_password=user.password,
     ):
         raise unauthed_exc
 
@@ -93,12 +93,12 @@ async def get_current_token_payload(
 ) -> dict:
     try:
         payload = decode_jwt(token=token)
-    except InvalidTokenError as err:
+    except InvalidTokenError as ex:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail='Invalid token',
             headers={'WWW-Authenticate': 'Bearer'},
-        ) from err
+        ) from ex
     return payload
 
 
