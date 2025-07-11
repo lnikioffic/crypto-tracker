@@ -13,7 +13,7 @@ async def get_user_by_username(
 ) -> UserLogin | None:
     stmt = select(User).filter(User.username == username)
     result: Result = await session.execute(stmt)
-    user = result.scalar()
+    user = result.scalar_one_or_none()
     return user
 
 

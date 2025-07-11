@@ -1,9 +1,9 @@
 from typing import Annotated
 
 from fastapi import Depends, Form, HTTPException, Path, status
-from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 from sqlalchemy.ext.asyncio import AsyncSession
+from src.auth.models import User
 from src.auth.schemas import TokenInfo, UserLogin, UserRead
 from src.auth.service import get_user_by_id, get_user_by_username
 from src.auth.token import (
@@ -46,7 +46,7 @@ async def valid_user_username(user_name: str, session: AsyncSession) -> UserLogi
 
 async def valid_user_id(
     user_id: Annotated[int, Path], session: AsyncSession
-) -> UserRead | None:
+) -> User | None:
     user = await get_user_by_id(session, user_id)
 
     if not user:

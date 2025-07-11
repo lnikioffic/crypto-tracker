@@ -5,8 +5,7 @@ from fastapi.security import OAuth2PasswordBearer
 
 class OAuth2PasswordBearerCookie(OAuth2PasswordBearer):
     async def __call__(self, request: Request) -> str | None:
-        token: str = request.cookies.get('access_token')
-        print(token)
+        token: str | None = request.cookies.get('access_token')
         if not token:
             token = request.cookies.get('refresh_token')
 
