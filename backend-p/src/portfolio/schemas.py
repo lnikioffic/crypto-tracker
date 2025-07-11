@@ -1,15 +1,17 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class PortfolioCoinBase(BaseModel):
     coin_id: str
-    amount: float
+    amount: float = Field(gt=0)
 
 
 class PortfolioCoinRead(PortfolioCoinBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
+    
+    total_value: float | None = None
 
 
 class PortfolioCoinCreate(PortfolioCoinBase):
@@ -30,6 +32,8 @@ class PortfolioRead(PortfolioBase):
 
     id: int
     coins: list[PortfolioCoinRead]
+
+    total_value: float = Field(default=0.0)
 
 
 class PortfolioCreate(PortfolioBase):
