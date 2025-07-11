@@ -18,6 +18,7 @@ from src.portfolio.service import (
     get_portfolios,
     update_portfolio_attributes,
     update_portfolio_coins,
+    get_portfolio,
 )
 from src.api_coins.schemas import CurrencyEnum, CoinData
 from src.api_coins.utils import CoinsResponse, response_parser
@@ -26,8 +27,36 @@ from src.auth.dependencies import get_current_auth_user_by_token_sub
 portfolio_router = APIRouter(prefix='/portfolio', tags=['Portfolio'])
 
 
+@portfolio_router.get('/{id}', response_model=PortfolioRead)
+async def get_portfolio_by_id(
+    id: Annotated[int, Path],
+    user: Annotated[UserRead, Depends(get_current_auth_user_by_token_sub)],
+    session: DbSession,
+    vs_currency: CurrencyEnum = CurrencyEnum.USD,
+):
+    coins_response = CoinsResponse()
+    portfolio = await get_portfolio(session=session, portfolio_id=id, user_id=user.id)
+    coins = await coins_response.get_coins_markets(
+        vs_currency=vs_currency,
+        params={'ids': ','.join(coin.coin_id for coin in portfolio.coins)},
+    )
+    coins_data: CoinData = response_parser(coins, CoinData)
+
+    portfolio = PortfolioRead.model_validate(portfolio, from_attributes=True)
+    for coin_data in coins_data:
+        for portfolio_coin in portfolio.coins:
+            if portfolio_coin.coin_id == coin_data.id:
+                print(portfolio_coin.coin_id)
+                portfolio_coin.total_value = (
+                    coin_data.current_price * portfolio_coin.amount
+                )
+                portfolio.total_value += portfolio_coin.total_value
+
+    return portfolio
+
+
 @portfolio_router.get('/', response_model=list[PortfolioRead])
-async def get_portfolio(
+async def get_portfolios_list(
     user: Annotated[UserRead, Depends(get_current_auth_user_by_token_sub)],
     session: DbSession,
     vs_currency: CurrencyEnum = CurrencyEnum.USD,
@@ -35,9 +64,6 @@ async def get_portfolio(
     coins_response = CoinsResponse()
     portfolios = await get_portfolios(session=session, user_id=user.id)
 
-    print(
-        ','.join(coin.coin_id for portfolio in portfolios for coin in portfolio.coins)
-    )
     coins = await coins_response.get_coins_markets(
         vs_currency=vs_currency,
         params={
@@ -46,8 +72,22 @@ async def get_portfolio(
             )
         },
     )
+
     coins_data = response_parser(coins, CoinData)
-    print(coins_data)
+    portfolios = [
+        PortfolioRead.model_validate(portfolio, from_attributes=True)
+        for portfolio in portfolios
+    ]
+
+    for portfolio in portfolios:
+        for coin_data in coins_data:
+            for portfolio_coin in portfolio.coins:
+                if portfolio_coin.coin_id == coin_data.id:
+                    print(portfolio_coin.coin_id)
+                    portfolio_coin.total_value = (
+                        coin_data.current_price * portfolio_coin.amount
+                    )
+                    portfolio.total_value += portfolio_coin.total_value
     return portfolios
 
 

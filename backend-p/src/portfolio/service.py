@@ -12,20 +12,27 @@ from src.portfolio.schemas import (
 )
 
 
+async def get_portfolio(
+    session: AsyncSession, portfolio_id: int, user_id: int
+) -> PortfolioRead | None:
+    query = (
+        select(Portfolio)
+        .options(joinedload(Portfolio.coins))
+        .filter(Portfolio.id == portfolio_id, Portfolio.user_id == user_id)
+    )
+    result: Result = await session.execute(query)
+    portfolio = result.unique().scalar_one_or_none()
+    return portfolio
+
 
 async def get_portfolios(session: AsyncSession, user_id: int) -> list[PortfolioRead]:
     query = (
         select(Portfolio)
-        .options(joinedload(Portfolio.coins), selectinload(Portfolio.user))
+        .options(joinedload(Portfolio.coins))
         .filter(Portfolio.user_id == user_id)
     )
     result: Result = await session.execute(query)
     portfolios = result.scalars().unique().all()
-    try:
-        await session.commit()
-    except Exception as e:
-        await session.rollback()
-        raise e
     return list(portfolios)
 
 
@@ -164,8 +171,8 @@ async def update_portfolio(
     portfolio_id: int,
     user_id: int,
     update_data: PortfolioUpdate,
-    new_coins: list[PortfolioCoinCreate] = None,
-    update_coins: list[PortfolioCoinUpdate] = None,
+    new_coins: list[PortfolioCoinCreate] | None = None,
+    update_coins: list[PortfolioCoinUpdate] | None = None,
 ):
     query = (
         select(Portfolio)
