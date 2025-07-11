@@ -1,11 +1,18 @@
 from datetime import datetime
+from enum import StrEnum
 
 from pydantic import BaseModel
+
+
+class CurrencyEnum(StrEnum):
+    USD = "usd"
+    RUB = "rub"
 
 
 class CoinName(BaseModel):
     id: str
     name: str
+
 
 class Coin(BaseModel):
     id: str

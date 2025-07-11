@@ -1,20 +1,18 @@
-from src.api_coins.utils import CoinsResponse
 import asyncio
-from src.api_coins.redis_client import RedisRepository
 
-redis = RedisRepository()
+from src.api_coins.schemas import Coin
+from src.api_coins.utils import CoinsResponse, response_parser
 
 
 async def main():
-    coi = await redis.get_coins()
+    pass
 
 
 async def cl():
     coins_response = CoinsResponse()
     coins = await coins_response.get_coins_list()
-    await redis.set_main_data(coins)
-    coins_from_redis = await redis.get_main_data()
-    print(coins_from_redis)
+    coins = response_parser(coins, Coin)
+    print(coins)
 
 
-asyncio.run(main())
+asyncio.run(cl())

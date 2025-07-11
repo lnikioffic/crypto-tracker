@@ -14,6 +14,7 @@ from src.auth.token import (
 )
 from src.auth.utils import decode_jwt, validate_password
 from src.database import DbSession
+from src.auth.oauth2 import OAuth2PasswordBearerCookie
 
 error_found = HTTPException(
     status_code=status.HTTP_404_NOT_FOUND,
@@ -85,11 +86,11 @@ async def validate_auth_user_issue_jwt(
     return await create_token_jwt(user)
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/auth/login')
+oauth2_scheme_cookie = OAuth2PasswordBearerCookie(tokenUrl='/auth/login')
 
 
 async def get_current_token_payload(
-    token: Annotated[str, Depends(oauth2_scheme)],
+    token: Annotated[str, Depends(oauth2_scheme_cookie)],
 ) -> dict:
     try:
         payload = decode_jwt(token=token)

@@ -1,18 +1,18 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi.security import HTTPBearer
 from src.auth.dependencies import (
     get_current_auth_user_by_token_sub,
-    validate_auth_user_issue_jwt,
-    validate_create_user,
     get_current_auth_user_for_refresh,
     refresh_token_jwt,
+    validate_auth_user_issue_jwt,
+    validate_create_user,
 )
 from src.auth.schemas import TokenInfo, UserCreate, UserRead
 from src.auth.service import create_user
-from src.auth.token import create_refresh_token
 from src.database import DbSession
+from src.auth.config import auth_jwt_settings
 
 http_bearer = HTTPBearer(auto_error=False)
 auth_router = APIRouter(
@@ -34,13 +34,28 @@ async def register(user: UserCreate, session: DbSession):
 
 @auth_router.post('/login', response_model=TokenInfo)
 async def login(
+    response: Response,
     token: Annotated[TokenInfo, Depends(validate_auth_user_issue_jwt)],
 ):
+    response.set_cookie(
+        key='access_token',
+        value=token.access_token,
+        httponly=True,
+        max_age=auth_jwt_settings.access_token_expire_minutes * 60,
+    )
+    response.set_cookie(
+        key='refresh_token',
+        value=token.refresh_token,
+        httponly=True,
+        max_age=auth_jwt_settings.refresh_token_expire_days * 24 * 60 * 60,
+    )
     return token
 
 
 @auth_router.post('/logout')
-async def logout():
+async def logout(response: Response):
+    response.delete_cookie(key='access_token')
+    response.delete_cookie(key='refresh_token')
     return TokenInfo(access_token='', refresh_token='')
 
 
@@ -48,9 +63,16 @@ async def logout():
     '/refresh', response_model=TokenInfo, response_model_exclude_none=True
 )
 async def refresh(
+    response: Response,
     user: Annotated[UserRead, Depends(get_current_auth_user_for_refresh)],
 ):
     token = await refresh_token_jwt(user)
+    response.set_cookie(
+        key='access_token',
+        value=token.access_token,
+        httponly=True,
+        max_age=auth_jwt_settings.access_token_expire_minutes * 60,
+    )
     return token
 
 

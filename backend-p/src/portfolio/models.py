@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from sqlalchemy import ForeignKey, String
+from sqlalchemy import ForeignKey, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.mixin import TimeStampMixin
 from src.models import Base
@@ -24,6 +24,11 @@ class Portfolio(TimeStampMixin, Base):
 
 class PortfolioCoin(TimeStampMixin, Base):
     __tablename__ = 'portfolio_coins'
+    __table_args__ = (
+        UniqueConstraint(
+            'portfolio_id', 'coin_id', name='idx_unique_portfolio_id_coin_id'
+        ),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     portfolio_id: Mapped[int] = mapped_column(
@@ -32,5 +37,4 @@ class PortfolioCoin(TimeStampMixin, Base):
     coin_id: Mapped[str] = mapped_column(String(50))
     amount: Mapped[float] = mapped_column(default=0.0)
 
-    # constrein unique
     portfolio: Mapped[Portfolio] = relationship(back_populates='coins')
