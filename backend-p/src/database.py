@@ -40,8 +40,16 @@ class DataBase:
                 await session.rollback()
                 raise
 
+    @contextlib.asynccontextmanager
     async def connect(self) -> AsyncIterator[AsyncConnection]:
-        pass
+        if self._engine is None:
+            raise OSError("Session if not initialized")
+        async with self._engine.begin() as connect:
+            try:
+                yield connect
+            except Exception:
+                await connect.rollback()
+                raise
 
 
 db = DataBase(config_db.get_db_url())
