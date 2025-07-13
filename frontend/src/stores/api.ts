@@ -5,20 +5,7 @@ const API_URL = "http://localhost:8000";
 
 export const api = axios.create({
   baseURL: API_URL,
-});
-
-api.interceptors.request.use(async (config) => {
-  const { accessToken, refreshToken } = useAuthStore.getState();
-
-  if (config.url?.includes("/auth/refresh")) {
-    if (refreshToken) {
-      config.headers.Authorization = `Bearer ${refreshToken}`;
-    }
-  } else if (accessToken) {
-    config.headers.Authorization = `Bearer ${accessToken}`;
-  }
-
-  return config;
+  withCredentials: true,
 });
 
 api.interceptors.response.use(
@@ -30,7 +17,8 @@ api.interceptors.response.use(
     // Не пытаться рефрешить токен на /auth/refresh или /auth/login
     const isAuthUrl =
       originalRequest.url?.includes("/auth/refresh") ||
-      originalRequest.url?.includes("/auth/login");
+      originalRequest.url?.includes("/auth/login") ||
+      originalRequest.url.includes("/auth/logout");
 
     if (
       error.response?.status === 401 &&
