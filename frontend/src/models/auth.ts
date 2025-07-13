@@ -16,8 +16,6 @@ export interface TokenResponse {
 
 export interface AuthStore {
   user: User | null;
-  accessToken: string | null;
-  refreshToken: string | null;
   isLoading: boolean;
   error: string | null;
   register: (
@@ -26,7 +24,7 @@ export interface AuthStore {
     password: string
   ) => Promise<void>;
   login: (username: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   refreshAccessToken: () => Promise<void>;
   fetchUser: () => Promise<void>;
 }
