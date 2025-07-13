@@ -14,7 +14,9 @@ export interface Portfolio {
 
 export interface PortfolioStore {
   portfolios: Portfolio[];
+  portfolio: Portfolio | null;
   loading: boolean;
   error: string | null;
   fetchPortfolios: () => Promise<void>;
+  fetchPortfolioById: (id: number) => Promise<void>;
 }

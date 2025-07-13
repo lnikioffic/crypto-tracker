@@ -6,6 +6,7 @@ import axios from "axios";
 
 export const usePortfolioStore = create<PortfolioStore>((set) => ({
   portfolios: [],
+  portfolio: null,
   loading: false,
   error: null,
 
@@ -23,7 +24,7 @@ export const usePortfolioStore = create<PortfolioStore>((set) => ({
       });
 
       set({ portfolios: data, loading: false });
-    } catch (error: unknown) {
+    } catch (error) {
       let errorMessage = "Failed to load portfolios";
 
       if (axios.isAxiosError(error)) {
@@ -44,6 +45,21 @@ export const usePortfolioStore = create<PortfolioStore>((set) => ({
         loading: false,
       });
       console.error("Error fetching portfolios:", error);
+    }
+  },
+
+  fetchPortfolioById: async (id: number) => {
+    set({ loading: true, error: null });
+    try {
+      const { data } = await api.get<Portfolio>(`/portfolio/${id}`);
+      set({ portfolio: data, loading: false });
+    } catch {
+      const errorMessage = "Failed to load portfolios";
+      set({
+        portfolio: null,
+        error: errorMessage,
+        loading: false,
+      });
     }
   },
 
