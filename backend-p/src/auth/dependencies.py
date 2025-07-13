@@ -4,6 +4,7 @@ from fastapi import Depends, Form, HTTPException, Path, status
 from jwt.exceptions import InvalidTokenError
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.auth.models import User
+from src.auth.oauth2 import OAuth2PasswordBearerCookie
 from src.auth.schemas import TokenInfo, UserLogin, UserRead
 from src.auth.service import get_user_by_id, get_user_by_username
 from src.auth.token import (
@@ -14,7 +15,6 @@ from src.auth.token import (
 )
 from src.auth.utils import decode_jwt, validate_password
 from src.database import DbSession
-from src.auth.oauth2 import OAuth2PasswordBearerCookie
 
 error_found = HTTPException(
     status_code=status.HTTP_404_NOT_FOUND,

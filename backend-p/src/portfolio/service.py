@@ -1,7 +1,7 @@
 from sqlalchemy import delete, select
 from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload, selectinload
+from sqlalchemy.orm import joinedload
 from src.portfolio.models import Portfolio, PortfolioCoin
 from src.portfolio.schemas import (
     PortfolioCoinCreate,

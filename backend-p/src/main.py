@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from src.api_coins.redis_client import RedisRepository
 from src.api_coins.router import coin_router
@@ -22,13 +22,19 @@ app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "*",
-    ],
+    allow_origins=['*'],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=['*'],
+    allow_headers=['*'],
 )
+
+
+@app.middleware("http")
+async def check_cookies(request: Request, call_next):
+    # print("Cookies:", request.cookies)  # Для отладки
+    response = await call_next(request)
+    return response
+
 
 app.include_router(auth_router)
 app.include_router(user_router)

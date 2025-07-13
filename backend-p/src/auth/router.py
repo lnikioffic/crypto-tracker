@@ -1,7 +1,8 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi import APIRouter, Depends, Response, status
 from fastapi.security import HTTPBearer
+from src.auth.config import auth_jwt_settings
 from src.auth.dependencies import (
     get_current_auth_user_by_token_sub,
     get_current_auth_user_for_refresh,
@@ -12,7 +13,6 @@ from src.auth.dependencies import (
 from src.auth.schemas import TokenInfo, UserCreate, UserRead
 from src.auth.service import create_user
 from src.database import DbSession
-from src.auth.config import auth_jwt_settings
 
 http_bearer = HTTPBearer(auto_error=False)
 auth_router = APIRouter(

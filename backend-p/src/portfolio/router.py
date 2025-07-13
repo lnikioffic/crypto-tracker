@@ -1,6 +1,9 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Path
+from src.api_coins.schemas import CoinData, CurrencyEnum
+from src.api_coins.utils import CoinsResponse, response_parser
+from src.auth.dependencies import get_current_auth_user_by_token_sub
 from src.auth.schemas import UserRead
 from src.database import DbSession
 from src.portfolio.schemas import (
@@ -15,16 +18,17 @@ from src.portfolio.service import (
     create_portfolio,
     delete_portfolio,
     delete_portfolio_coin,
+    get_portfolio,
     get_portfolios,
     update_portfolio_attributes,
     update_portfolio_coins,
-    get_portfolio,
 )
-from src.api_coins.schemas import CurrencyEnum, CoinData
-from src.api_coins.utils import CoinsResponse, response_parser
-from src.auth.dependencies import get_current_auth_user_by_token_sub
 
-portfolio_router = APIRouter(prefix='/portfolio', tags=['Portfolio'])
+portfolio_router = APIRouter(
+    prefix='/portfolio',
+    tags=['Portfolio'],
+    dependencies=[Depends(get_current_auth_user_by_token_sub)],
+)
 
 
 @portfolio_router.get('/{id}', response_model=PortfolioRead)
@@ -46,7 +50,6 @@ async def get_portfolio_by_id(
     for coin_data in coins_data:
         for portfolio_coin in portfolio.coins:
             if portfolio_coin.coin_id == coin_data.id:
-                print(portfolio_coin.coin_id)
                 portfolio_coin.total_value = (
                     coin_data.current_price * portfolio_coin.amount
                 )
@@ -83,7 +86,6 @@ async def get_portfolios_list(
         for coin_data in coins_data:
             for portfolio_coin in portfolio.coins:
                 if portfolio_coin.coin_id == coin_data.id:
-                    print(portfolio_coin.coin_id)
                     portfolio_coin.total_value = (
                         coin_data.current_price * portfolio_coin.amount
                     )
