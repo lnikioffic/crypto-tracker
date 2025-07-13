@@ -3,24 +3,28 @@ import "./App.css";
 import Header from "./components/Header";
 import MarketOverview from "./pages/MarketOverview";
 import { useAuthStore } from "./stores/authStore";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import PortfolioPage from "./pages/Portfolio";
 
 function App() {
   const root = window.document.documentElement;
   root.classList.add("dark");
 
-  const accessToken = useAuthStore((s) => s.accessToken);
   const fetchUser = useAuthStore((s) => s.fetchUser);
 
   useEffect(() => {
-    if (accessToken) {
-      fetchUser();
-    }
-  }, [accessToken, fetchUser]);
-  
+    fetchUser().catch(() => {});
+  }, [fetchUser]);
+
   return (
     <>
-      <Header />
-      <MarketOverview />
+      <Router>
+        <Header />
+        <Routes>
+          <Route path="/" element={<MarketOverview />} />
+          <Route path="/portfolio" element={<PortfolioPage />} />
+        </Routes>
+      </Router>
     </>
   );
 }

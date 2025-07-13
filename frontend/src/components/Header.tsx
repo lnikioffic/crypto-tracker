@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import LoginModal from "./modals/Login";
 import RegisterModal from "./modals/Register";
+import { Link } from "react-router-dom";
 
 function Header() {
   const [loginOpen, setLoginOpen] = useState(false);
@@ -27,20 +28,20 @@ function Header() {
             <Button
               variant="ghost"
               className={cn(
-                "px-3 py-2 rounded-md text-sm font-medium transition-colors"
-                // currentPage === "market" && "bg-accent text-accent-foreground"
+                "px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                // location.pathname === "/" && "bg-accent" // подсветка активной ссылки
               )}
             >
-              Криптовалюты
+              <Link to="/">Криптовалюты</Link>
             </Button>
             <Button
               variant="ghost"
               className={cn(
-                "px-3 py-2 rounded-md text-sm font-medium"
-                // currentPage === "portfolio" && "bg-accent text-accent-foreground"
+                "px-3 py-2 rounded-md text-sm font-medium",
+                // location.pathname === "/portfolio" && "bg-accent" // подсветка активной ссылки
               )}
             >
-              Портфель
+              <Link to="/portfolio">Портфели</Link>
             </Button>
           </div>
 
