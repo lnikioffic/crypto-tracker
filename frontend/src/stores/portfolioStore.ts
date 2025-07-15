@@ -1,4 +1,8 @@
-import type { Portfolio, PortfolioStore } from "@/models/portfolio";
+import type {
+  Portfolio,
+  PortfolioDetail,
+  PortfolioStore,
+} from "@/models/portfolio";
 import { create } from "zustand";
 import { useAuthStore } from "@/stores/authStore";
 import { api } from "./api";
@@ -48,10 +52,10 @@ export const usePortfolioStore = create<PortfolioStore>((set) => ({
     }
   },
 
-  fetchPortfolioById: async (id: number) => {
+  getPortfolio: async (id: number) => {
     set({ loading: true, error: null });
     try {
-      const { data } = await api.get<Portfolio>(`/portfolio/${id}`);
+      const { data } = await api.get<PortfolioDetail>(`/portfolio/${id}`);
       set({ portfolio: data, loading: false });
     } catch {
       const errorMessage = "Failed to load portfolios";
@@ -60,6 +64,62 @@ export const usePortfolioStore = create<PortfolioStore>((set) => ({
         error: errorMessage,
         loading: false,
       });
+    }
+  },
+
+  deletePortfolio: async (id: number) => {
+    set({ loading: true, error: null });
+    try {
+      await api.delete(`/portfolio/${id}`);
+
+      set({ loading: false });
+      return true; // Успешное удаление
+    } catch (error) {
+      const errorMessage = axios.isAxiosError(error)
+        ? error.response?.data?.detail || "Ошибка при удалении портфеля"
+        : "Неизвестная ошибка";
+      set({
+        portfolio: null,
+        error: errorMessage,
+        loading: false,
+      });
+      return false;
+    }
+  },
+
+  createPortfolio: async (name, coins) => {
+    set({ loading: true, error: null });
+    try {
+      const { data } = await api.post("/portfolio", {
+        portfolio: { name },
+        coins,
+      });
+      console.log(data.id);
+      return data.id;
+    } catch {
+      alert("Ошибка при создании портфеля");
+    }
+  },
+
+  updatePortfolio: async (id, updateData, newCoins, updateCoins) => {
+    try {
+      await api.patch(`/portfolio/${id}`, {
+        update_data: updateData,
+        new_coins: newCoins,
+        update_coins: updateCoins,
+      });
+    } catch (error) {
+      console.error("Ошибка обновления портфеля:", error);
+      throw error;
+    }
+  },
+
+  deletePortfolioCoin: async (portfolioId, coinId) => {
+    try {
+      await api.delete(`/portfolio/${portfolioId}/${coinId}`);
+    } catch (error) {
+      console.error("Ошибка удаления монеты:", error);
+      throw error;
     }
   },
 
