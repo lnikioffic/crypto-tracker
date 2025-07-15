@@ -1,7 +1,10 @@
+import logging
 from fastapi import APIRouter, HTTPException, status
 from src.api_coins.redis_client import RedisRepository
 from src.api_coins.schemas import CoinData, CoinName
 from src.api_coins.utils import CoinsResponse, dict_to_model_list, response_parser
+
+log = logging.getLogger(__name__)
 
 coin_router = APIRouter(prefix='/coins', tags=['Coins'])
 coins_response = CoinsResponse()

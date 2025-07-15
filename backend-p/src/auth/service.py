@@ -1,3 +1,4 @@
+import logging
 from fastapi import HTTPException, status
 from pydantic import EmailStr
 from sqlalchemy import select
@@ -6,6 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.auth.models import User
 from src.auth.schemas import UserCreate, UserLogin, UserRead
 from src.auth.utils import hash_password
+
+log = logging.getLogger(__name__)
 
 
 async def get_user_by_username(

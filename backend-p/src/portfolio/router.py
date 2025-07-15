@@ -1,3 +1,4 @@
+import logging
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Path
@@ -23,6 +24,8 @@ from src.portfolio.service import (
     update_portfolio_attributes,
     update_portfolio_coins,
 )
+
+log = logging.getLogger(__name__)
 
 portfolio_router = APIRouter(
     prefix='/portfolio',
@@ -54,6 +57,7 @@ async def get_portfolio_by_id(
                     coin_data.current_price * portfolio_coin.amount
                 )
                 portfolio.total_value += portfolio_coin.total_value
+                portfolio_coin.coin_deatil = coin_data
 
     return portfolio
 
@@ -99,14 +103,14 @@ async def create_portfolio_handler(
     coins: list[PortfolioCoinCreate],
     user: Annotated[UserRead, Depends(get_current_auth_user_by_token_sub)],
     session: DbSession,
-):
-    await create_portfolio(
+) -> dict:
+    portfolio_new = await create_portfolio(
         session=session,
         portfolio_create=portfolio,
         coins=coins,
         user_id=user.id,
     )
-    return
+    return {'id': portfolio_new.id}
 
 
 @portfolio_router.delete('/{id}')
@@ -119,6 +123,7 @@ async def del_portfolio(
     if check:
         return {'message': 'портфель удалён'}
 
+    log.error(f'Ошибка при удалении портфеля {id}, пользователя {user.id}')
     return {'message': 'Ошибка'}
 
 
@@ -162,4 +167,7 @@ async def delete_portfolio_coin_handler(
     if check:
         return {'message': 'монета удалена из портфеля'}
 
+    log.error(
+        f'Ошибка при удалении монеты из портфеля {portfolio_id}, монеты {coin_id}, пользователя {user.id}'
+    )
     return {'message': 'Ошибка при удалении монеты из портфеля'}

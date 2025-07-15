@@ -1,3 +1,5 @@
+import logging
+
 from sqlalchemy import delete, select
 from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,6 +13,7 @@ from src.portfolio.schemas import (
     PortfolioUpdate,
 )
 
+log = logging.getLogger(__name__)
 
 async def get_portfolio(
     session: AsyncSession, portfolio_id: int, user_id: int
@@ -42,16 +45,19 @@ async def create_portfolio(
     user_id: int,
     coins: list[PortfolioCoinCreate],
 ):
+
+    portfolio = Portfolio(**portfolio_create.model_dump(), user_id=user_id)
+
+    portfolio.coins.extend([PortfolioCoin(**coin.model_dump()) for coin in coins])
+
+    session.add_all([portfolio])
     try:
-        portfolio = Portfolio(**portfolio_create.model_dump(), user_id=user_id)
-
-        portfolio.coins.extend([PortfolioCoin(**coin.model_dump()) for coin in coins])
-
-        session.add_all([portfolio])
         await session.commit()
     except Exception as ex:
+        log.error(ex)
         await session.rollback()
         raise ex
+    return portfolio
 
 
 async def delete_portfolio(session: AsyncSession, portfolio_id: int, user_id: int):
@@ -62,9 +68,10 @@ async def delete_portfolio(session: AsyncSession, portfolio_id: int, user_id: in
 
     try:
         await session.commit()
-    except Exception as e:
+    except Exception as ex:
+        log.error(ex)
         await session.rollback()
-        raise e
+        raise ex
     return result.rowcount
 
 
@@ -80,9 +87,10 @@ async def delete_portfolio_coin(
 
     try:
         await session.commit()
-    except Exception as e:
+    except Exception as ex:
+        log.error(ex)
         await session.rollback()
-        raise e
+        raise ex
     return result.rowcount
 
 
@@ -160,9 +168,10 @@ async def _commit_changes(session: AsyncSession) -> None:
     """Выполняет commit с обработкой ошибок"""
     try:
         await session.commit()
-    except Exception as e:
+    except Exception as ex:
+        log.error(ex)
         await session.rollback()
-        raise e
+        raise ex
 
 
 # Update portfolio with new coins and updated coins
@@ -203,7 +212,8 @@ async def update_portfolio(
 
     try:
         await session.commit()
-    except Exception as e:
+    except Exception as ex:
+        log.error(ex)
         await session.rollback()
-        raise e
+        raise ex
     return portfolio

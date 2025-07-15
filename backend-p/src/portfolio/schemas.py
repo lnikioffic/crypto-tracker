@@ -1,4 +1,5 @@
 from pydantic import BaseModel, ConfigDict, Field
+from src.api_coins.schemas import CoinData
 
 
 class PortfolioCoinBase(BaseModel):
@@ -10,8 +11,10 @@ class PortfolioCoinRead(PortfolioCoinBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    
+
     total_value: float | None = None
+
+    coin_deatil: CoinData | None = None
 
 
 class PortfolioCoinCreate(PortfolioCoinBase):

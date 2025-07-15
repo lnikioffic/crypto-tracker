@@ -1,4 +1,6 @@
 from contextlib import asynccontextmanager
+import logging
+import sys
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -7,13 +9,23 @@ from src.api_coins.router import coin_router
 from src.auth.router import auth_router, user_router
 from src.database import db
 from src.portfolio.router import portfolio_router
+from src.logging import configure_logging
+
+
+log = logging.getLogger(__name__)
+configure_logging()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    client = RedisRepository()
-    respons = await client._client.ping()
-    print(f"Redis connection status: {respons}")
+    try:
+        client = RedisRepository()
+        response = await client._client.ping()
+        print(f"Redis connection status: {response}")
+        log.info(f"Redis connection status: {response}")
+    except:
+        log.error(' Application startup failed. Exiting.', exc_info=True)
+        sys.exit(1)
     yield
     await db.close()
 

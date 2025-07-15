@@ -1,5 +1,5 @@
 from typing import Annotated
-
+import logging
 from fastapi import APIRouter, Depends, Response, status
 from fastapi.security import HTTPBearer
 from src.auth.config import auth_jwt_settings
@@ -13,6 +13,8 @@ from src.auth.dependencies import (
 from src.auth.schemas import TokenInfo, UserCreate, UserRead
 from src.auth.service import create_user
 from src.database import DbSession
+
+log = logging.getLogger(__name__)
 
 http_bearer = HTTPBearer(auto_error=False)
 auth_router = APIRouter(
