@@ -62,17 +62,23 @@ function PortfolioPage() {
   };
 
   if (loading) return <LoadingState />;
-  if (error) return <ErrorState error={error} onRetry={handleRetry} />;
-  if (portfolios.length === 0) return <EmptyState onRetry={handleRetry} />;
 
   return (
     <div className="container mx-auto py-8 space-y-4">
-      <h1 className="text-3xl font-bold mb-6">Мои портфели</h1>
-      <div className="space-y-4">
-        {portfolios.map((portfolio) => (
-          <PortfolioCard key={portfolio.id} portfolio={portfolio} />
-        ))}
-      </div>
+      {error ? (
+        <ErrorState error={error} onRetry={handleRetry} />
+      ) : portfolios.length === 0 ? (
+        <EmptyState onRetry={handleRetry} />
+      ) : (
+        <>
+          <h1 className="text-3xl font-bold mb-6">Мои портфели</h1>
+          <div className="space-y-4">
+            {portfolios.map((portfolio) => (
+              <PortfolioCard key={portfolio.id} portfolio={portfolio} />
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }
