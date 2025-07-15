@@ -28,7 +28,7 @@ function Header() {
             <Button
               variant="ghost"
               className={cn(
-                "px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                "px-3 py-2 rounded-md text-sm font-medium transition-colors"
                 // location.pathname === "/" && "bg-accent" // подсветка активной ссылки
               )}
             >
@@ -37,11 +37,20 @@ function Header() {
             <Button
               variant="ghost"
               className={cn(
-                "px-3 py-2 rounded-md text-sm font-medium",
+                "px-3 py-2 rounded-md text-sm font-medium"
                 // location.pathname === "/portfolio" && "bg-accent" // подсветка активной ссылки
               )}
             >
-              <Link to="/portfolio">Портфели</Link>
+              <Link to="/portfolios">Портфели</Link>
+            </Button>
+            <Button
+              variant="ghost"
+              className={cn(
+                "px-3 py-2 rounded-md text-sm font-medium"
+                // location.pathname === "/portfolio" && "bg-accent" // подсветка активной ссылки
+              )}
+            >
+              <Link to="/portfolios/create">Добавить портфель</Link>
             </Button>
           </div>
 
