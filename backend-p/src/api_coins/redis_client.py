@@ -14,23 +14,23 @@ class RedisRepository:
 
     async def set_coins(self, coins: list[Coin]):
         serialized = json.dumps([coin.model_dump() for coin in coins], default=str)
-        await self._client.set("coins:list", serialized, ex=3600)  # 1 hour expiration
+        await self._client.set('coins:list', serialized, ex=3600)  # 1 hour expiration
 
     async def get_coins(self) -> list[dict]:
-        data = await self._client.get("coins:list")
+        data = await self._client.get('coins:list')
         if not data:
             return []
         coin_dicts = json.loads(data)
         return coin_dicts
 
-    async def set_main_data(self, data: list[CoinData]):
+    async def set_main_data(self, key: str, data: list[CoinData]):
         serialized = json.dumps([d.model_dump() for d in data], default=str)
         await self._client.set(
-            "coins:main_data", serialized, ex=120
+            f'coins:main_data:{key}', serialized, ex=120
         )  # 2 minutes expiration
 
-    async def get_main_data(self) -> list[dict]:
-        data = await self._client.get("coins:main_data")
+    async def get_main_data(self, key: str) -> list[dict]:
+        data = await self._client.get(f'coins:main_data{key}')
         if not data:
             return []
         coin_dicts = json.loads(data)

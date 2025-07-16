@@ -1,5 +1,6 @@
 import httpx
 from pydantic import BaseModel
+from src.api_coins.schemas import CurrencyEnum
 from src.api_coins.config import config_coins
 
 
@@ -26,10 +27,6 @@ def response_parser[T: BaseModel](response: httpx.Response, type_pars: T) -> lis
     return [type_pars(**item) for item in response.json()]
 
 
-def dict_to_model_list[T: BaseModel](data: list[dict], model_type: T) -> list[T]:
-    return [model_type(**item) for item in data]
-
-
 class CoinsResponse:
     def __init__(self):
         self._base_url = 'https://api.coingecko.com'
@@ -46,7 +43,9 @@ class CoinsResponse:
         return response
 
     async def get_coins_markets(
-        self, vs_currency: str = 'usd', params: dict[str, str] | None = None
+        self,
+        vs_currency: CurrencyEnum = CurrencyEnum.USD,
+        params: dict[str, str] | None = None,
     ) -> httpx.Response:
         default_params = {'vs_currency': vs_currency}
         if params is None:

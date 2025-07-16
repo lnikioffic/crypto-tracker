@@ -1,12 +1,12 @@
 from datetime import datetime
 from enum import StrEnum
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class CurrencyEnum(StrEnum):
-    USD = "usd"
-    RUB = "rub"
+    USD = 'usd'
+    RUB = 'rub'
 
 
 class CoinName(BaseModel):
@@ -30,7 +30,7 @@ class CoinData(BaseModel):
     market_cap: float
     market_cap_rank: int
     fully_diluted_valuation: float
-    total_volume: float
+    total_volume: float | None = Field(default=0.0)
     high_24h: float
     low_24h: float
     price_change_24h: float

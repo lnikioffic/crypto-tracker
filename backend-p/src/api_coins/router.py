@@ -1,8 +1,8 @@
 import logging
 from fastapi import APIRouter, HTTPException, status
 from src.api_coins.redis_client import RedisRepository
-from src.api_coins.schemas import CoinData, CoinName
-from src.api_coins.utils import CoinsResponse, dict_to_model_list, response_parser
+from src.api_coins.schemas import CoinData, CoinName, CurrencyEnum
+from src.api_coins.utils import CoinsResponse, response_parser
 
 log = logging.getLogger(__name__)
 
@@ -15,7 +15,7 @@ async def get_coins_list_name():
     redis_repository = RedisRepository()
     coins = await redis_repository.get_coins()
     if coins:
-        coins = dict_to_model_list(coins, CoinName)
+        coins = [CoinName(**coin) for coin in coins]
         return coins
 
     coins = await coins_response.get_coins_list()
@@ -26,25 +26,32 @@ async def get_coins_list_name():
 
 
 @coin_router.get('/', status_code=200, response_model=list[CoinData])
-async def get_coins_list():
+async def get_coins_list(
+    vs_currency: CurrencyEnum = CurrencyEnum.USD,
+):
     redis_repository = RedisRepository()
-    coins = await redis_repository.get_main_data()
+    coins = await redis_repository.get_main_data(key=vs_currency)
     if coins:
-        coins = dict_to_model_list(coins, CoinData)
+        coins = [CoinData(**coin) for coin in coins]
         return coins
 
-    coins = await coins_response.get_coins_markets()
+    coins = await coins_response.get_coins_markets(vs_currency=vs_currency)
     coins = response_parser(coins, CoinData)
 
-    await redis_repository.set_main_data(coins)
+    await redis_repository.set_main_data(key=vs_currency, data=coins)
     return coins
 
 
 # TODO Сделать проверку на колличество ids
 @coin_router.get('/{ids}', status_code=200, response_model=CoinData)
-async def get_coin(ids: str):
-    params = {'ids': ids}
-    coins = await coins_response.get_coins_markets(params=params)
+async def get_coin(
+    ids: str,
+    vs_currency: CurrencyEnum = CurrencyEnum.USD,
+):
+    params = {'vs_currency': vs_currency, 'ids': ids}
+    coins = await coins_response.get_coins_markets(
+        vs_currency=vs_currency, params=params
+    )
     coin = response_parser(coins, CoinData)
     if len(coin) == 0:
         raise HTTPException(
