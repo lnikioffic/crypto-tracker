@@ -1,7 +1,7 @@
 import httpx
 from pydantic import BaseModel
-from src.api_coins.schemas import CurrencyEnum
 from src.api_coins.config import config_coins
+from src.api_coins.schemas import CurrencyEnum
 
 
 class HttpClient:

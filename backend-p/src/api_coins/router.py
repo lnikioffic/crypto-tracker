@@ -1,4 +1,5 @@
 import logging
+
 from fastapi import APIRouter, HTTPException, status
 from src.api_coins.redis_client import RedisRepository
 from src.api_coins.schemas import CoinData, CoinName, CurrencyEnum

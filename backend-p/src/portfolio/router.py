@@ -47,7 +47,7 @@ async def get_portfolio_by_id(
         vs_currency=vs_currency,
         params={'ids': ','.join(coin.coin_id for coin in portfolio.coins)},
     )
-    coins_data: CoinData = response_parser(coins, CoinData)
+    coins_data: list[CoinData] = response_parser(coins, CoinData)
 
     portfolio = PortfolioRead.model_validate(portfolio, from_attributes=True)
     for coin_data in coins_data:
@@ -80,7 +80,7 @@ async def get_portfolios_list(
         },
     )
 
-    coins_data = response_parser(coins, CoinData)
+    coins_data: list[CoinData] = response_parser(coins, CoinData)
     portfolios = [
         PortfolioRead.model_validate(portfolio, from_attributes=True)
         for portfolio in portfolios

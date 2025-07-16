@@ -1,5 +1,6 @@
-from typing import Annotated
 import logging
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, Response, status
 from fastapi.security import HTTPBearer
 from src.auth.config import auth_jwt_settings
@@ -28,9 +29,22 @@ user_router = APIRouter(
 @auth_router.post(
     '/register', status_code=status.HTTP_201_CREATED, response_model=TokenInfo
 )
-async def register(user: UserCreate, session: DbSession):
+async def register(response: Response, user: UserCreate, session: DbSession):
     user_read = await create_user(session, user)
     token = await validate_create_user(user_read)
+    response.set_cookie(
+        key='access_token',
+        value=token.access_token,
+        httponly=True,
+        max_age=auth_jwt_settings.access_token_expire_minutes * 60,
+    )
+    if token.refresh_token is not None:
+        response.set_cookie(
+            key='refresh_token',
+            value=token.refresh_token,
+            httponly=True,
+            max_age=auth_jwt_settings.refresh_token_expire_days * 24 * 60 * 60,
+        )
     return token
 
 
@@ -45,12 +59,13 @@ async def login(
         httponly=True,
         max_age=auth_jwt_settings.access_token_expire_minutes * 60,
     )
-    response.set_cookie(
-        key='refresh_token',
-        value=token.refresh_token,
-        httponly=True,
-        max_age=auth_jwt_settings.refresh_token_expire_days * 24 * 60 * 60,
-    )
+    if token.refresh_token is not None:
+        response.set_cookie(
+            key='refresh_token',
+            value=token.refresh_token,
+            httponly=True,
+            max_age=auth_jwt_settings.refresh_token_expire_days * 24 * 60 * 60,
+        )
     return token
 
 

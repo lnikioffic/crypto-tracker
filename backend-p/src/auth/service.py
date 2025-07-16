@@ -1,4 +1,5 @@
 import logging
+
 from fastapi import HTTPException, status
 from pydantic import EmailStr
 from sqlalchemy import select
