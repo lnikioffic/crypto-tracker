@@ -5,6 +5,7 @@ import { useAuthStore } from "@/stores/authStore";
 import LoginModal from "./modals/Login";
 import RegisterModal from "./modals/Register";
 import { Link } from "react-router-dom";
+import CurrencySelect from "./CurrencySelect";
 
 function Header() {
   const [loginOpen, setLoginOpen] = useState(false);
@@ -13,7 +14,6 @@ function Header() {
   const logout = useAuthStore((s) => s.logout);
   const isAuthenticated = !!user;
 
-  console.log(isAuthenticated);
   return (
     <header className="border-b-4">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -55,6 +55,7 @@ function Header() {
           </div>
 
           <div className="flex items-center space-x-2 md:space-x-6">
+            <CurrencySelect/>
             {isAuthenticated ? (
               <div className="flex items-center space-x-1 md:space-x-3">
                 <Button

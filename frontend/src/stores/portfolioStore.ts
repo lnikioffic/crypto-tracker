@@ -7,6 +7,7 @@ import { create } from "zustand";
 import { useAuthStore } from "@/stores/authStore";
 import { api } from "./api";
 import axios from "axios";
+import { useCurrencyStore } from "./currencyStore";
 
 export const usePortfolioStore = create<PortfolioStore>((set) => ({
   portfolios: [],
@@ -18,13 +19,14 @@ export const usePortfolioStore = create<PortfolioStore>((set) => ({
     set({ loading: true, error: null });
     const { user } = useAuthStore.getState();
     const isAuthenticated = !!user;
+    const { currency } = useCurrencyStore.getState();
     try {
       if (!isAuthenticated) {
         throw new Error("Not authenticated");
       }
 
       const { data } = await api.get<Portfolio[]>("/portfolio/", {
-        params: { vs_currency: "usd" },
+        params: { vs_currency: currency.toLocaleLowerCase() },
       });
 
       set({ portfolios: data, loading: false });
@@ -54,8 +56,11 @@ export const usePortfolioStore = create<PortfolioStore>((set) => ({
 
   getPortfolio: async (id: number) => {
     set({ loading: true, error: null });
+    const { currency } = useCurrencyStore.getState();
     try {
-      const { data } = await api.get<PortfolioDetail>(`/portfolio/${id}`);
+      const { data } = await api.get<PortfolioDetail>(`/portfolio/${id}`, {
+        params: { vs_currency: currency.toLocaleLowerCase() },
+      });
       set({ portfolio: data, loading: false });
     } catch {
       const errorMessage = "Failed to load portfolios";

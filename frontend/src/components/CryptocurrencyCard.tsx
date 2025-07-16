@@ -1,6 +1,7 @@
 import { Card } from "./ui/card";
 import React from "react";
 import type { CryptoData } from "@/models/cryptoData";
+import { useCurrencyStore } from "@/stores/currencyStore";
 
 type CryptocurrencyCardProps = {
   data: CryptoData;
@@ -10,6 +11,8 @@ const CryptocurrencyCard: React.FC<CryptocurrencyCardProps> = ({ data }) => {
   const { symbol, name, image, current_price, price_change_percentage_24h } =
     data;
   const isPositive = price_change_percentage_24h >= 0;
+  const { currency } = useCurrencyStore();
+  const symbol_val = currency === "USD" ? "$" : "₽";
 
   return (
     <Card className="p-4 flex flex-col gap-2 shadow-md min-w-[220px]">
@@ -25,7 +28,8 @@ const CryptocurrencyCard: React.FC<CryptocurrencyCardProps> = ({ data }) => {
         <span className="uppercase text-gray-500">{symbol}</span>
       </div>
       <div className="text-2xl font-semibold">
-        ${current_price.toLocaleString(undefined, { maximumFractionDigits: 8 })}
+        {symbol_val}
+        {current_price.toLocaleString(undefined, { maximumFractionDigits: 8 })}
       </div>
       <div
         className={`text-sm font-medium ${
