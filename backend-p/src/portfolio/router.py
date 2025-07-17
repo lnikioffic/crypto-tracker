@@ -44,7 +44,7 @@ async def get_portfolio_by_id(
     coins_response = CoinsResponse()
     portfolio = await get_portfolio(session=session, portfolio_id=id, user_id=user.id)
     coins = await coins_response.get_coins_markets(
-        vs_currency=vs_currency,
+        vs_currency=vs_currency.value,
         params={'ids': ','.join(coin.coin_id for coin in portfolio.coins)},
     )
     coins_data: list[CoinData] = response_parser(coins, CoinData)
@@ -72,7 +72,7 @@ async def get_portfolios_list(
     portfolios = await get_portfolios(session=session, user_id=user.id)
 
     coins = await coins_response.get_coins_markets(
-        vs_currency=vs_currency,
+        vs_currency=vs_currency.value,
         params={
             'ids': ','.join(
                 coin.coin_id for portfolio in portfolios for coin in portfolio.coins
