@@ -12,3 +12,4 @@ certs
 .vscode
 app.log
 test_db.db
+.coverage
