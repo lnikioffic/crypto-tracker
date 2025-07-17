@@ -1,7 +1,6 @@
 import httpx
 from pydantic import BaseModel
 from src.api_coins.config import config_coins
-from src.api_coins.schemas import CurrencyEnum
 
 
 class HttpClient:
@@ -44,7 +43,7 @@ class CoinsResponse:
 
     async def get_coins_markets(
         self,
-        vs_currency: CurrencyEnum = CurrencyEnum.USD,
+        vs_currency: str = 'usd',
         params: dict[str, str] | None = None,
     ) -> httpx.Response:
         default_params = {'vs_currency': vs_currency}
