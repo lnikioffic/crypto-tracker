@@ -27,7 +27,10 @@ async def get_coins_list_name():
     coins = await coins_response.get_coins_list()
     coins = response_parser(coins, CoinName)
 
-    await redis_repository.set_coins(coins)
+    try:
+        await redis_repository.set_coins(coins)
+    except RedisError as ex:
+        log.error(f'Failed to cache data: {ex}')
     return coins
 
 
