@@ -1,0 +1,15 @@
+__pycache__/
+
+.venv
+.ruff_cache
+.mypy_cache
+.pytest_cache
+.env
+redis
+Users
+certs
+
+.vscode
+app.log
+test_db.db
+.coverage

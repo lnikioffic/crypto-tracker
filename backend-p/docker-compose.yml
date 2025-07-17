@@ -1,0 +1,25 @@
+services:
+  db:
+    image: postgres:16
+    container_name: postgres-p
+    ports:
+      - "5432:5432"
+    volumes:
+      - db:/var/lib/postgresql/data
+    env_file:
+      - .env
+
+  redis:
+    image: redis
+    container_name: redis
+    restart: unless-stopped
+    volumes:
+      - ./redis/data:/data
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+    ports:
+      - 6379:6379
+    command: redis-server /usr/local/etc/redis/redis.conf
+
+volumes:
+  db:
+    driver: local
