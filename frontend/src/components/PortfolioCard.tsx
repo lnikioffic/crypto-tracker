@@ -1,26 +1,30 @@
 import type { Portfolio } from "@/models/portfolio";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Link } from "react-router-dom";
+import { useCurrencyStore } from "@/stores/currencyStore";
 
-const formatCurrency = (value: number) =>
-  value.toLocaleString("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
+// const formatCurrency = (value: number) =>
+//   value.toLocaleString("en-US", {
+//     style: "currency",
+//     currency: "USD",
+//     minimumFractionDigits: 2,
+//     maximumFractionDigits: 2,
+//   });
 
 const formatCryptoAmount = (amount: number) =>
   amount.toLocaleString("en-US", { maximumFractionDigits: 8 });
 
 function PortfolioCard({ portfolio }: { portfolio: Portfolio }) {
+  const { currency } = useCurrencyStore();
+  const symbol_val = currency === "USD" ? "$" : "₽";
   return (
     <Link to={`/portfolios/${portfolio.id}`} className="block mb-4">
       <Card>
         <CardHeader>
           <CardTitle className="text-4xl font-bold">{portfolio.name}</CardTitle>
           <div className="text-lg font-semibold">
-            {formatCurrency(portfolio.total_value)}
+            {symbol_val}
+            {Math.round(portfolio.total_value * 100) / 100}
           </div>
         </CardHeader>
 
