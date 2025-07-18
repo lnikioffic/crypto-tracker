@@ -49,6 +49,31 @@ async def db_session(database: DataBase) -> AsyncGenerator[AsyncSession, Any]:
 
 
 @pytest.fixture
+async def sample_user(db_session: AsyncSession):
+    from src.auth.models import User
+    from src.auth.utils import hash_password
+    from src.portfolio.models import Portfolio
+
+    user = User(
+        username='testuser',
+        email='testuser@example.com',
+        password=hash_password('test').decode(),
+    )
+
+    db_session.add(user)
+    await db_session.commit()
+    await db_session.refresh(user)
+
+    yield user
+
+    await db_session.execute(
+        Portfolio.__table__.delete().where(Portfolio.user_id == user.id)
+    )
+    await db_session.delete(user)
+    await db_session.commit()
+
+
+@pytest.fixture
 async def client(
     app: FastAPI, db_session: AsyncSession
 ) -> AsyncGenerator[AsyncClient, Any]:

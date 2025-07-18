@@ -1,7 +1,7 @@
 import logging
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Path
+from fastapi import APIRouter, Depends, HTTPException, Path, status
 from src.api_coins.schemas import CoinData, CurrencyEnum
 from src.api_coins.utils import CoinsResponse, response_parser
 from src.auth.dependencies import get_current_auth_user_by_token_sub
@@ -43,6 +43,13 @@ async def get_portfolio_by_id(
 ):
     coins_response = CoinsResponse()
     portfolio = await get_portfolio(session=session, portfolio_id=id, user_id=user.id)
+
+    if portfolio is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Portfolio not found',
+        )
+
     coins = await coins_response.get_coins_markets(
         vs_currency=vs_currency.value,
         params={'ids': ','.join(coin.coin_id for coin in portfolio.coins)},
@@ -97,7 +104,7 @@ async def get_portfolios_list(
     return portfolios
 
 
-@portfolio_router.post('/')
+@portfolio_router.post('/', status_code=status.HTTP_201_CREATED)
 async def create_portfolio_handler(
     portfolio: PortfolioCreate,
     coins: list[PortfolioCoinCreate],
