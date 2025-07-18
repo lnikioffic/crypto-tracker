@@ -1,4 +1,5 @@
 import logging
+from collections.abc import Callable
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
@@ -8,7 +9,8 @@ from src.api_coins.redis_client import RedisRepository
 from src.api_coins.router import coin_router
 from src.auth.router import auth_router, user_router
 from src.database import db
-from src.logging import configure_logging
+from src.logger_setup import configure_logging
+from src.middlewares import TracingMiddleware
 from src.portfolio.router import portfolio_router
 
 log = logging.getLogger(__name__)
@@ -38,8 +40,8 @@ app.add_middleware(
 
 
 @app.middleware("http")
-async def check_cookies(request: Request, call_next):
-    
+async def check_cookies(request: Request, call_next: Callable):
+
     log.info(f"Request started: {request.method} {request.url}")
     response = await call_next(request)
     log.info(
@@ -49,6 +51,7 @@ async def check_cookies(request: Request, call_next):
 
 
 app.add_middleware(GZipMiddleware, minimum_size=1000)
+app.add_middleware(TracingMiddleware)
 
 app.include_router(auth_router)
 app.include_router(user_router)
