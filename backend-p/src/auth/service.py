@@ -29,7 +29,7 @@ async def get_user_by_id(session: AsyncSession, id: int) -> User | None:
 async def get_user_by_email(session: AsyncSession, email: EmailStr) -> UserLogin | None:
     stmt = select(User).filter(User.email == email)
     result = await session.execute(stmt)
-    user = result.scalar()
+    user = result.scalar_one_or_none()
     return user
 
 
